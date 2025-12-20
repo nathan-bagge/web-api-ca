@@ -144,4 +144,4 @@ export const signup = async (username, password) => {
         body: JSON.stringify({ username: username, password: password })
     });
     return response.json();
-};
+};  
