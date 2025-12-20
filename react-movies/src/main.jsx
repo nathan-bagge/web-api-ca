@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Navigate, Routes } from "react-router";
+import { BrowserRouter, Route, Navigate, Routes } from "react-router-dom";
 import HomePage from "./pages/homePage";
 import MoviePage from "./pages/movieDetailsPage";
 import FavoriteMoviesPage from "./pages/favoriteMoviesPage";
@@ -15,8 +15,13 @@ import TrendingMoviesPage from "./pages/trendingMoviesPage";
 import NowPlayingMoviesPage from "./pages/nowPlayingMoviesPage";
 import TopRatedMoviesPage from "./pages/topRatedMoviesPage";
 import MustWatchMoviesPage from "./pages/mustWatchMoviesPage";
+import LoginPage from "./pages/loginPage";
+import SignUpPage from "./pages/signupPage.jsx";
+import ProfilePage from "./pages/profilePage.jsx";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { lightTheme, darkTheme } from "./util.jsx";
+import AuthContextProvider from "./contexts/authContext.jsx";
+import './App.css';
 
 
 const theme = createTheme({
@@ -61,6 +66,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+    <AuthContextProvider>
       <BrowserRouter>
         <SiteHeader onToggleTheme={toggleTheme} darkMode={darkMode} />
         <MoviesContextProvider>
@@ -76,9 +82,13 @@ const App = () => {
             <Route path="/movies/trending/today" element={<TrendingMoviesPage />} />
             <Route path="/movies/nowplaying" element={<NowPlayingMoviesPage />} />
             <Route path="/movies/toprated" element={<TopRatedMoviesPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </MoviesContextProvider>
       </BrowserRouter>
+      </AuthContextProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../../contexts/authContext";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -7,7 +8,7 @@ import Button from "@mui/material/Button";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -17,6 +18,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 
 const SiteHeader = ({ onToggleTheme, darkMode }) => {
+  const { isAuthenticated, userName, signout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -25,7 +27,7 @@ const SiteHeader = ({ onToggleTheme, darkMode }) => {
   
   const navigate = useNavigate();
 
-  const menuOptions = [
+  const commonOptions = [
     { label: "Home", path: "/" },
     { label: "Favorites", path: "/movies/favorites" },
     { label: "Must Watch", path: "/movies/mustwatch" },
@@ -34,6 +36,15 @@ const SiteHeader = ({ onToggleTheme, darkMode }) => {
     { label: "Now Playing", path: "/movies/nowplaying" },
     { label: "Top Rated", path: "/movies/toprated" },
   ];
+
+  const authOptions = isAuthenticated
+  ? [{ label: "Profile", path: "/profile" }]
+  : [
+      { label: "Login", path: "/login" },
+      { label: "Signup", path: "/signup" },
+    ];
+
+  const menuOptions = [...commonOptions, ...authOptions];
 
   const handleMenuSelect = (pageURL) => {
     setAnchorEl(null);
@@ -88,6 +99,17 @@ const SiteHeader = ({ onToggleTheme, darkMode }) => {
                       {opt.label}
                     </MenuItem>
                   ))}
+                  {isAuthenticated && (
+                   <MenuItem
+                    onClick={() => {
+                    setAnchorEl(null);
+                    signout();
+                    navigate("/");
+                  }}
+                  >
+                   Logout
+                   </MenuItem>
+                  )}
                 </Menu>
               </>
             ) : (
@@ -101,6 +123,17 @@ const SiteHeader = ({ onToggleTheme, darkMode }) => {
                     {opt.label}
                   </Button>
                 ))}
+                {isAuthenticated && (
+                <Typography variant="subtitle1" sx={{ ml: 2, mr: 1 }}>
+                 {userName}
+                </Typography>
+                )}
+                {isAuthenticated && (
+                 <Button 
+                    color="inherit" onClick={() => { signout(); navigate("/"); }}>
+                    Logout
+                 </Button>
+)}
               </>
             )}
             <Button color="inherit" onClick={onToggleTheme}>
