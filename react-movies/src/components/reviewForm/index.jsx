@@ -1,36 +1,20 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { useForm, Controller } from "react-hook-form";
-import { MoviesContext } from "../../contexts/moviesContext";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const ratings = [
-  {
-    value: 5,
-    label: "Excellent",
-  },
-  {
-    value: 4,
-    label: "Good",
-  },
-  {
-    value: 3,
-    label: "Average",
-  },
-  {
-    value: 2,
-    label: "Poor",
-  },
-  {
-    value: 0,
-    label: "Terrible",
-  },
+  { value: 5, label: "Excellent" },
+  { value: 4, label: "Good" },
+  { value: 3, label: "Average" },
+  { value: 2, label: "Poor" },
+  { value: 0, label: "Terrible" },
 ];
 
 const styles = {
@@ -38,7 +22,7 @@ const styles = {
     marginTop: 2,
     display: "flex",
     flexDirection: "column",
-    alignItems: "left",
+    alignItems: "flex-start",
   },
   form: {
     width: "100%",
@@ -52,6 +36,11 @@ const styles = {
   submit: {
     marginRight: 2,
   },
+  buttons: {
+    display: "flex",
+    gap: 2,
+    marginTop: 2,
+  },
   snack: {
     width: "50%",
     "& > * ": {
@@ -60,47 +49,34 @@ const styles = {
   },
 };
 
-const ReviewForm = ({ movie }) => {
-const context = useContext(MoviesContext);
-const [rating, setRating] = useState(3);
-const [open, setOpen] = useState(false); 
-const navigate = useNavigate();
+const defaultValues = {
+  author: "",
+  review: "",
+  agree: false,
+  rating: 3,
+};
 
-  
-  const defaultValues = {
-    author: "",
-    review: "",
-    agree: false,
-    rating: "3",
-  };
-  
+const ReviewForm = ({ onSubmit }) => {
+  const [rating, setRating] = useState(defaultValues.rating);
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
   const {
     control,
     formState: { errors },
     handleSubmit,
     reset,
-  } = useForm(defaultValues);
+  } = useForm({ defaultValues });
 
-  const handleRatingChange = (event) => {
-    setRating(event.target.value);
-  };
-
-    const handleSnackClose = (event) => {
+  const handleSnackClose = () => {
     setOpen(false);
     navigate("/movies/favorites");
   };
 
-      const onSubmit = (review) => {
-    review.movieId = movie.id;
-    review.rating = rating;
-    // console.log(review);
-    context.addReview(movie, review);
-    setOpen(true); // NEW
+  const handleFormSubmit = async (data) => {
+    await onSubmit({ rating, reviewText: data.review });
+    setOpen(true);
   };
-
-
-    
-
 
   return (
     <Box component="div" sx={styles.root}>
@@ -108,7 +84,7 @@ const navigate = useNavigate();
         Write a review
       </Typography>
 
-        <Snackbar
+      <Snackbar
         sx={styles.snack}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={open}
@@ -125,23 +101,20 @@ const navigate = useNavigate();
         </MuiAlert>
       </Snackbar>
 
-      <form sx={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form onSubmit={handleSubmit(handleFormSubmit)} noValidate>
         <Controller
           name="author"
           control={control}
           rules={{ required: "Name is required" }}
           defaultValue=""
-          render={({ field: { onChange, value } }) => (
+          render={({ field }) => (
             <TextField
-              sx={{ width: "40ch" }}
+              sx={{ width: styles.textField }}
               variant="outlined"
               margin="normal"
               required
-              onChange={onChange}
-              value={value}
-              id="author"
+              {...field}
               label="Author's name"
-              name="author"
               autoFocus
             />
           )}
@@ -158,16 +131,14 @@ const navigate = useNavigate();
             required: "Review cannot be empty.",
             minLength: { value: 10, message: "Review is too short" },
           }}
-          defaultValue=""
-          render={({ field: { onChange, value } }) => (
+          render={({ field }) => (
             <TextField
               variant="outlined"
               margin="normal"
               required
               fullWidth
               name="review"
-              value={value}
-              onChange={onChange}
+              {...field}
               label="Review text"
               id="review"
               multiline
@@ -181,27 +152,21 @@ const navigate = useNavigate();
           </Typography>
         )}
 
-        <Controller
-          control={control}
-          name="rating"
-          render={({ field: { onChange, value } }) => (
-            <TextField
-              id="select-rating"
-              select
-              variant="outlined"
-              label="Rating Select"
-              value={rating}
-              onChange={handleRatingChange}
-              helperText="Don't forget your rating"
-            >
-              {ratings.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
-        />
+        <TextField
+          id="select-rating"
+          select
+          variant="outlined"
+          label="Rating Select"
+          value={rating}
+          onChange={(e) => setRating(Number(e.target.value))}
+          helperText="Don't forget your rating"
+        >
+          {ratings.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
 
         <Box sx={styles.buttons}>
           <Button
@@ -218,10 +183,8 @@ const navigate = useNavigate();
             color="secondary"
             sx={styles.submit}
             onClick={() => {
-              reset({
-                author: "",
-                content: "",
-              });
+              reset(defaultValues);
+              setRating(defaultValues.rating);
             }}
           >
             Reset
