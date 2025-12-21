@@ -21,6 +21,7 @@ import ProfilePage from "./pages/profilePage.jsx";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { lightTheme, darkTheme } from "./util.jsx";
 import AuthContextProvider from "./contexts/authContext.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 import './App.css';
 
 
@@ -71,8 +72,8 @@ const App = () => {
         <SiteHeader onToggleTheme={toggleTheme} darkMode={darkMode} />
         <MoviesContextProvider>
           <Routes>
-            <Route path="/movies/favorites" element={<FavoriteMoviesPage />} />
-            <Route path="/movies/mustwatch" element={<MustWatchMoviesPage />} />
+            <Route path="/movies/favorites" element={<RequireAuth><FavoriteMoviesPage /></RequireAuth>} />
+            <Route path="/movies/mustwatch" element={<RequireAuth><MustWatchMoviesPage /></RequireAuth>} />
             <Route path="/reviews/:id" element={<MovieReviewPage />} />
             <Route path="/movies/:id" element={<MoviePage />} />
             <Route path="/" element={<HomePage />} />
